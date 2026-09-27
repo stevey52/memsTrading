@@ -1,0 +1,6 @@
+{
+  "name": "Solana Shitcoin Sniper & Scalp Terminal",
+  "description": "High-frequency Solana memecoin sniper, momentum scanner, and scalp trading terminal with dual log streams and live telemetry.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
