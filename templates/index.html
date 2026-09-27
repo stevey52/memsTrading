@@ -521,8 +521,136 @@
       </div>
     </section>
 
+    <!-- ROW: QUANTITATIVE ML ALPHA ENGINE (XGBoost + Embeddings) -->
+    <section class="bg-[#0b0e17] border border-blue-500/20 rounded-xl p-4 shadow-2xl space-y-4 overflow-hidden relative font-mono">
+      <!-- Ambient background glow -->
+      <div class="absolute -top-24 -left-24 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+      <!-- Header -->
+      <div class="flex flex-wrap items-center justify-between gap-3 relative z-10 border-b border-white/10 pb-3">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-lg bg-blue-500/20 border border-blue-500/40 flex items-center justify-center text-cyan-400 shadow-lg">
+            <i data-lucide="binary" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="font-extrabold text-sm tracking-wider uppercase text-white">
+                QUANTITATIVE ML ALPHA ENGINE
+              </h2>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-blue-500/20 text-cyan-300 border border-blue-500/30 flex items-center gap-1 font-mono">
+                <i data-lucide="cpu" class="w-3 h-3 text-cyan-400"></i>
+                <span id="mlModelStatusBadge">GBDT / XGBoost Active</span>
+              </span>
+              <span id="mlStatusDotBadge" class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1 font-mono">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>Sub-2ms Pre-Filter</span>
+              </span>
+            </div>
+            <p class="text-xs text-slate-400 font-mono">
+              High-Frequency Tabular Machine Learning · Recycled Cabal Vector Clone Detector · Fast Pruning Pre-Gate
+            </p>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2 text-xs">
+          <!-- Fast Pruned Counter Badge -->
+          <div class="bg-slate-900/80 border border-white/10 px-2.5 py-1.5 rounded-md flex items-center gap-2">
+            <i data-lucide="zap-off" class="w-3.5 h-3.5 text-amber-400"></i>
+            <span class="text-slate-400">Fast-Pruned:</span>
+            <span class="text-amber-300 font-bold" id="mlPrunedCountText">0 junk tokens</span>
+          </div>
+
+          <!-- Inferences & Latency -->
+          <div class="bg-slate-900/80 border border-white/10 px-2.5 py-1.5 rounded-md flex items-center gap-2">
+            <i data-lucide="timer" class="w-3.5 h-3.5 text-cyan-400"></i>
+            <span class="text-slate-400">Avg Latency:</span>
+            <span class="text-cyan-300 font-bold" id="mlLatencyText">1.2ms</span>
+          </div>
+
+          <!-- Trigger Retrain Button -->
+          <button onclick="triggerMlRetrain()" id="btnMlRetrain" class="flex items-center gap-1.5 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/40 text-blue-200 px-3 py-1.5 rounded-md transition-colors font-semibold cursor-pointer" title="Auto-fits gradient boosted decision trees on historical candidate rows">
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-cyan-400" id="mlRetrainIcon"></i>
+            <span id="mlRetrainBtnText">Retrain Models</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ML 3-Gauge Live Telemetry Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3 relative z-10 text-xs">
+        <!-- Gauge 1: P(Rug) Estimator -->
+        <div class="bg-[#0e121d] border border-white/10 rounded-xl p-3 space-y-2 hover:border-red-500/40 transition-colors">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <div class="w-7 h-7 rounded-md bg-red-500/20 border border-red-500/40 flex items-center justify-center text-red-400">
+                <i data-lucide="shield-alert" class="w-4 h-4"></i>
+              </div>
+              <span class="font-bold text-white">Rug Probability P(Rug)</span>
+            </div>
+            <span class="text-[10px] text-red-400 bg-red-950/60 border border-red-500/30 px-1.5 py-0.5 rounded" id="mlRugThresholdBadge">Gate: &le; 45%</span>
+          </div>
+          <div class="flex items-baseline justify-between pt-1">
+            <div class="text-2xl font-black tabular-nums text-slate-200" id="mlGaugeRugVal">--%</div>
+            <div class="text-[10px] text-slate-400" id="mlGaugeRugSub">Dev Dump &amp; Honeypot Risk</div>
+          </div>
+          <div class="w-full h-1.5 bg-slate-950 rounded-full overflow-hidden border border-white/5">
+            <div id="mlGaugeRugBar" class="h-full bg-emerald-500 transition-all duration-300" style="width: 15%;"></div>
+          </div>
+          <p class="text-[10px] text-slate-500 pt-0.5">
+            Analyzes 20 features: dev buy size, top 10 non-curve concentration, liquidity depth, and order flow.
+          </p>
+        </div>
+
+        <!-- Gauge 2: Breakout Conviction Alpha -->
+        <div class="bg-[#0e121d] border border-white/10 rounded-xl p-3 space-y-2 hover:border-cyan-500/40 transition-colors">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <div class="w-7 h-7 rounded-md bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-400">
+                <i data-lucide="trending-up" class="w-4 h-4"></i>
+              </div>
+              <span class="font-bold text-white">Breakout Alpha Score</span>
+            </div>
+            <span class="text-[10px] text-cyan-400 bg-cyan-950/60 border border-cyan-500/30 px-1.5 py-0.5 rounded" id="mlAlphaThresholdBadge">Gate: &ge; 60/100</span>
+          </div>
+          <div class="flex items-baseline justify-between pt-1">
+            <div class="text-2xl font-black tabular-nums text-cyan-300" id="mlGaugeAlphaVal">--/100</div>
+            <div class="text-[10px] text-slate-400" id="mlGaugeAlphaSub">Upside Velocity Potential</div>
+          </div>
+          <div class="w-full h-1.5 bg-slate-950 rounded-full overflow-hidden border border-white/5">
+            <div id="mlGaugeAlphaBar" class="h-full bg-cyan-500 transition-all duration-300" style="width: 50%;"></div>
+          </div>
+          <p class="text-[10px] text-slate-500 pt-0.5">
+            Estimates volume surges, buy/sell order imbalance, bonding curve slope, and viral social presence.
+          </p>
+        </div>
+
+        <!-- Gauge 3: Semantic Vector Clone Detector -->
+        <div class="bg-[#0e121d] border border-white/10 rounded-xl p-3 space-y-2 hover:border-purple-500/40 transition-colors">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <div class="w-7 h-7 rounded-md bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-400">
+                <i data-lucide="copy" class="w-4 h-4"></i>
+              </div>
+              <span class="font-bold text-white">Semantic Clone Risk</span>
+            </div>
+            <span class="text-[10px] text-purple-400 bg-purple-950/60 border border-purple-500/30 px-1.5 py-0.5 rounded" id="mlCloneThresholdBadge">Gate: &le; 70%</span>
+          </div>
+          <div class="flex items-baseline justify-between pt-1">
+            <div class="text-2xl font-black tabular-nums text-purple-300" id="mlGaugeCloneVal">--%</div>
+            <div class="text-[10px] text-slate-400" id="mlGaugeCloneSub">Scam Template Vector Match</div>
+          </div>
+          <div class="w-full h-1.5 bg-slate-950 rounded-full overflow-hidden border border-white/5">
+            <div id="mlGaugeCloneBar" class="h-full bg-purple-500 transition-all duration-300" style="width: 20%;"></div>
+          </div>
+          <p class="text-[10px] text-slate-500 pt-0.5">
+            TF-IDF character &amp; word n-gram cosine auditor comparing against known recycled cabal templates in &lt; 5ms.
+          </p>
+        </div>
+      </div>
+    </section>
+
     <!-- ROW 2: DUAL INDEPENDENT LOG STREAMS (SPLIT VIEW) -->
     <section class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
       <!-- LEFT STREAM: DEXSCREENER MOMENTUM SCANNER -->
       <div class="bg-[#0b0e17] border border-cyan-500/20 rounded-xl flex flex-col h-[460px] shadow-xl overflow-hidden">
         <!-- Header -->
@@ -758,6 +886,45 @@
       </div>
 
       <div class="space-y-4 max-h-[70vh] overflow-y-auto pr-2 text-xs font-mono">
+        <!-- Solana Wallet & RPC Node Configuration -->
+        <div class="p-3.5 bg-slate-900/90 rounded-xl border border-white/10 space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <i data-lucide="wallet" class="w-4 h-4 text-emerald-400"></i>
+              <span class="font-bold text-white text-xs">Solana Keypair &amp; RPC Engine</span>
+            </div>
+            <span id="cfgWalletStatusBadge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
+              Not Configured
+            </span>
+          </div>
+
+          <!-- Solana Private Key -->
+          <div class="space-y-1">
+            <div class="flex items-center justify-between">
+              <label class="text-slate-400">Solana Private Key (Base58 or JSON Array)</label>
+              <span class="text-[10px] text-slate-500 font-mono" id="cfgWalletAddressPreview">Pubkey: None</span>
+            </div>
+            <div class="relative flex items-center">
+              <input type="password" id="cfgSolanaPrivateKey" placeholder="Paste Base58 key from Phantom (Settings -> Export Private Key)" class="w-full bg-slate-950 border border-white/10 rounded-lg px-3 py-2 pr-10 text-slate-100 font-mono text-xs focus:border-emerald-400 focus:outline-none">
+              <button type="button" onclick="togglePasswordVisibility('cfgSolanaPrivateKey')" class="absolute right-2.5 text-slate-400 hover:text-white p-1">
+                <i data-lucide="eye" class="w-3.5 h-3.5" id="cfgSolanaPrivateKeyToggle"></i>
+              </button>
+            </div>
+            <div class="text-[10px] text-slate-500">
+              Required for automated transaction signing. Stored locally in `.env`.
+            </div>
+          </div>
+
+          <!-- Solana RPC URL -->
+          <div class="space-y-1">
+            <label class="text-slate-400">Solana RPC Endpoint URL</label>
+            <input type="text" id="cfgSolanaRpcUrl" placeholder="https://api.mainnet-beta.solana.com or Helius/QuickNode URL" class="w-full bg-slate-950 border border-white/10 rounded-lg px-3 py-2 text-slate-100 font-mono text-xs focus:border-emerald-400 focus:outline-none">
+            <div class="text-[10px] text-slate-500">
+              Dedicated RPC (Helius/QuickNode) recommended for sub-100ms latency.
+            </div>
+          </div>
+        </div>
+
         <!-- Autonomous AI Agent Council Configuration -->
         <div class="p-3.5 bg-purple-950/20 rounded-xl border border-purple-500/30 space-y-3">
           <div class="flex items-center justify-between">
@@ -823,6 +990,55 @@
             </div>
           </div>
         </div>
+
+        <!-- Quantitative ML Alpha Engine (XGBoost + Embeddings) Configuration -->
+        <div class="p-3.5 bg-blue-950/20 rounded-xl border border-blue-500/30 space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <i data-lucide="binary" class="w-4 h-4 text-cyan-400"></i>
+              <span class="font-bold text-white text-xs">Quantitative Machine Learning Engine (XGBoost / GBDT)</span>
+            </div>
+            <span id="cfgMlStatusBadge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-500/20 text-cyan-300 border border-blue-500/30">
+              Active (&lt; 2ms)
+            </span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 pt-1">
+            <div class="space-y-1">
+              <label class="flex items-center gap-1.5 text-slate-300 cursor-pointer">
+                <input type="checkbox" id="cfgMlFilterEnabled" checked class="rounded border-slate-700 text-cyan-500 focus:ring-0">
+                <span>Enable ML Fast Pruning</span>
+              </label>
+              <div class="text-[10px] text-slate-500">Prunes rugs &amp; clone templates in &lt; 2ms before AI LLM</div>
+            </div>
+            <div class="space-y-1">
+              <label class="flex items-center gap-1.5 text-slate-300 cursor-pointer">
+                <input type="checkbox" id="cfgMlAutoRetrain" checked class="rounded border-slate-700 text-blue-500 focus:ring-0">
+                <span>Auto-Retrain GBDT</span>
+              </label>
+              <div class="text-[10px] text-slate-500">Auto-fits models on logged trade datasets</div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-3 pt-1">
+            <div class="space-y-1">
+              <label class="text-slate-400">Max P(Rug) (%)</label>
+              <input type="number" id="cfgMaxRugProbability" step="0.05" min="0.1" max="0.9" value="0.45" class="w-full bg-slate-900 border border-white/10 rounded-lg px-2.5 py-1.5 text-red-300 font-bold focus:border-red-400">
+              <div class="text-[10px] text-slate-500">Drop if P(Rug) &gt; 45%</div>
+            </div>
+            <div class="space-y-1">
+              <label class="text-slate-400">Min ML Alpha</label>
+              <input type="number" id="cfgMinMlAlphaScore" step="1" min="10" max="95" value="60" class="w-full bg-slate-900 border border-white/10 rounded-lg px-2.5 py-1.5 text-cyan-300 font-bold focus:border-cyan-400">
+              <div class="text-[10px] text-slate-500">Drop if Alpha &lt; 60</div>
+            </div>
+            <div class="space-y-1">
+              <label class="text-slate-400">Max Clone Risk (%)</label>
+              <input type="number" id="cfgMaxCloneRisk" step="1" min="20" max="95" value="70" class="w-full bg-slate-900 border border-white/10 rounded-lg px-2.5 py-1.5 text-purple-300 font-bold focus:border-purple-400">
+              <div class="text-[10px] text-slate-500">Drop if Clone &gt; 70%</div>
+            </div>
+          </div>
+        </div>
+
 
         <div class="grid grid-cols-2 gap-3">
           <div class="space-y-1">
@@ -2049,6 +2265,34 @@
               </span>
             </div>
 
+            ${tok.ml_eval ? `
+            <div class="mt-2 p-1.5 rounded-lg bg-blue-950/40 border border-blue-500/30 space-y-1 text-[10px] font-mono">
+              <div class="flex items-center justify-between text-blue-300">
+                <div class="flex items-center gap-1">
+                  <i data-lucide="binary" class="w-3 h-3 text-cyan-400"></i>
+                  <span class="font-bold">ML Quantitative Alpha</span>
+                </div>
+                <span class="px-1.5 py-0.2 rounded text-[9px] font-bold ${tok.ml_eval.approved !== false ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-red-500/20 text-red-300 border border-red-500/40'}">
+                  ${tok.ml_eval.verdict || (tok.ml_eval.approved !== false ? 'ML APPROVED' : 'ML PRUNED')}
+                </span>
+              </div>
+              <div class="grid grid-cols-3 gap-1 pt-0.5 text-[9px]">
+                <div class="bg-slate-950/80 px-1.5 py-0.5 rounded border border-white/5">
+                  <span class="text-slate-500">P(Rug):</span>
+                  <span class="font-bold ${tok.ml_eval.rug_pct > 40 ? 'text-red-400' : 'text-emerald-400'}">${tok.ml_eval.rug_pct}%</span>
+                </div>
+                <div class="bg-slate-950/80 px-1.5 py-0.5 rounded border border-white/5">
+                  <span class="text-slate-500">ML Alpha:</span>
+                  <span class="font-bold text-cyan-400">${tok.ml_eval.alpha_score}</span>
+                </div>
+                <div class="bg-slate-950/80 px-1.5 py-0.5 rounded border border-white/5">
+                  <span class="text-slate-500">Clone Risk:</span>
+                  <span class="font-bold ${tok.ml_eval.clone_risk > 60 ? 'text-amber-400' : 'text-slate-300'}">${tok.ml_eval.clone_risk}%</span>
+                </div>
+              </div>
+            </div>
+            ` : ''}
+
             ${tok.agent_eval ? `
             <div class="mt-2 p-1.5 rounded-lg bg-purple-950/40 border border-purple-500/30 flex items-center justify-between text-[10px] font-mono">
               <div class="flex items-center gap-1.5 text-purple-300">
@@ -2061,6 +2305,7 @@
               </span>
             </div>
             ` : ''}
+
           </div>
 
           <div class="pt-2 border-t border-white/5 flex items-center justify-between text-xs">
@@ -2519,7 +2764,67 @@
         const el = document.getElementById('cfgPreGradEnabled');
         if (el) el.checked = s.pump_pre_graduation_tracking;
       }
+      if (s.wallet_configured !== undefined) {
+        const badge = document.getElementById('cfgWalletStatusBadge');
+        const preview = document.getElementById('cfgWalletAddressPreview');
+        if (s.wallet_configured && s.wallet_address && s.wallet_address !== 'Not Configured') {
+          if (badge) {
+            badge.innerText = 'Connected & Active';
+            badge.className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+          }
+          if (preview) {
+            preview.innerText = `Pubkey: ${s.wallet_address.slice(0, 4)}...${s.wallet_address.slice(-4)}`;
+          }
+        } else {
+          if (badge) {
+            badge.innerText = 'Not Configured';
+            badge.className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30';
+          }
+          if (preview) {
+            preview.innerText = 'Pubkey: None';
+          }
+        }
+      }
+      if (s.solana_rpc_url !== undefined) {
+        const el = document.getElementById('cfgSolanaRpcUrl');
+        if (el && !el.value) el.value = s.solana_rpc_url;
+      }
+      if (s.ml_filter_enabled !== undefined) {
+        settings.mlFilterEnabled = s.ml_filter_enabled;
+        const el = document.getElementById('cfgMlFilterEnabled');
+        if (el) el.checked = s.ml_filter_enabled;
+      }
+      if (s.max_rug_probability !== undefined) {
+        settings.maxRugProbability = s.max_rug_probability;
+        const el = document.getElementById('cfgMaxRugProbability');
+        if (el) el.value = s.max_rug_probability;
+        const b = document.getElementById('mlRugThresholdBadge');
+        if (b) b.innerText = `Gate: ≤ ${(s.max_rug_probability * 100).toFixed(0)}%`;
+      }
+      if (s.min_ml_alpha_score !== undefined) {
+        settings.minMlAlphaScore = s.min_ml_alpha_score;
+        const el = document.getElementById('cfgMinMlAlphaScore');
+        if (el) el.value = s.min_ml_alpha_score;
+        const b = document.getElementById('mlAlphaThresholdBadge');
+        if (b) b.innerText = `Gate: ≥ ${Math.round(s.min_ml_alpha_score)}/100`;
+      }
+      if (s.max_clone_risk !== undefined) {
+        settings.maxCloneRisk = s.max_clone_risk;
+        const el = document.getElementById('cfgMaxCloneRisk');
+        if (el) el.value = s.max_clone_risk;
+        const b = document.getElementById('mlCloneThresholdBadge');
+        if (b) b.innerText = `Gate: ≤ ${Math.round(s.max_clone_risk)}%`;
+      }
+      if (s.ml_auto_retrain !== undefined) {
+        settings.mlAutoRetrain = s.ml_auto_retrain;
+        const el = document.getElementById('cfgMlAutoRetrain');
+        if (el) el.checked = s.ml_auto_retrain;
+      }
+      if (s.ml_stats) {
+        updateMlDashboard(s.ml_stats);
+      }
     }
+
 
     function loadSettingsFromBackend() {
       fetch('/api/status')
@@ -2527,11 +2832,19 @@
         .then(data => {
           if (data.wallet_address) {
             currentWalletAddress = data.wallet_address;
-            const short = data.wallet_short || (data.wallet_address.slice(0, 4) + '...' + data.wallet_address.slice(-4));
             const shortEl = document.getElementById('walletShortKey');
-            if (shortEl) shortEl.innerText = short;
+            if (shortEl) {
+              if (data.wallet_address !== 'Not Configured' && data.wallet_address !== 'None') {
+                const short = data.wallet_short || (data.wallet_address.slice(0, 4) + '...' + data.wallet_address.slice(-4));
+                shortEl.innerText = short;
+                shortEl.className = 'text-slate-200 font-semibold';
+              } else {
+                shortEl.innerText = 'Not Configured';
+                shortEl.className = 'text-amber-400 font-semibold cursor-pointer hover:underline';
+              }
+            }
             const solscan = document.getElementById('walletSolscanLink');
-            if (solscan && currentWalletAddress !== 'Not Configured') {
+            if (solscan && currentWalletAddress !== 'Not Configured' && currentWalletAddress !== 'None') {
               solscan.href = `https://solscan.io/account/${currentWalletAddress}`;
             }
           }
@@ -2574,6 +2887,8 @@
       settings.requireTwitter = document.getElementById('cfgRequireTwitter')?.checked ?? true;
       settings.requireTelegram = document.getElementById('cfgRequireTelegram')?.checked ?? false;
 
+      const solanaPrivateKey = document.getElementById('cfgSolanaPrivateKey')?.value?.trim();
+      const solanaRpcUrl = document.getElementById('cfgSolanaRpcUrl')?.value?.trim();
       const geminiKeyInput = document.getElementById('cfgGeminiApiKey')?.value?.trim();
       const agentEvalEnabled = document.getElementById('cfgAgentEvalEnabled')?.checked ?? true;
       const minAgentAlphaScore = parseFloat(document.getElementById('cfgMinAgentAlphaScore')?.value) || 75.0;
@@ -2590,6 +2905,11 @@
       settings.moonbagTrail = parseFloat(document.getElementById('cfgMoonbagTrail')?.value) || 22.0;
       settings.runnerHold = parseInt(document.getElementById('cfgRunnerHold')?.value) || 1200;
       settings.preGradEnabled = document.getElementById('cfgPreGradEnabled')?.checked ?? true;
+      settings.mlFilterEnabled = document.getElementById('cfgMlFilterEnabled')?.checked ?? true;
+      settings.maxRugProbability = parseFloat(document.getElementById('cfgMaxRugProbability')?.value) || 0.45;
+      settings.minMlAlphaScore = parseFloat(document.getElementById('cfgMinMlAlphaScore')?.value) || 60.0;
+      settings.maxCloneRisk = parseFloat(document.getElementById('cfgMaxCloneRisk')?.value) || 70.0;
+      settings.mlAutoRetrain = document.getElementById('cfgMlAutoRetrain')?.checked ?? true;
 
       const bTP = document.getElementById('cfgBadgeTP');
       if (bTP) bTP.innerText = `TP: +${settings.takeProfit}%`;
@@ -2621,7 +2941,19 @@
         moonbag_trailing_drop_pct: settings.moonbagTrail,
         runner_hold_seconds: settings.runnerHold,
         pump_pre_graduation_tracking: settings.preGradEnabled,
+        ml_filter_enabled: settings.mlFilterEnabled,
+        max_rug_probability: settings.maxRugProbability,
+        min_ml_alpha_score: settings.minMlAlphaScore,
+        max_clone_risk: settings.maxCloneRisk,
+        ml_auto_retrain: settings.mlAutoRetrain,
       };
+
+      if (solanaPrivateKey) {
+        payload.solana_private_key = solanaPrivateKey;
+      }
+      if (solanaRpcUrl) {
+        payload.solana_rpc_url = solanaRpcUrl;
+      }
       if (geminiKeyInput) {
         payload.gemini_api_key = geminiKeyInput;
       }
@@ -2633,10 +2965,17 @@
       })
       .then(r => r.json())
       .then(res => {
-        showToast(res.message || 'Settings saved successfully', 'success');
-        if (res.settings) applySettingsToUI(res.settings);
-        const keyInp = document.getElementById('cfgGeminiApiKey');
-        if (keyInp) keyInp.value = '';
+        if (res.success) {
+          showToast(res.message || 'Settings saved successfully', 'success');
+          if (res.settings) applySettingsToUI(res.settings);
+          const keyInp = document.getElementById('cfgGeminiApiKey');
+          if (keyInp) keyInp.value = '';
+          const pkInp = document.getElementById('cfgSolanaPrivateKey');
+          if (pkInp) pkInp.value = '';
+          loadSettingsFromBackend();
+        } else {
+          showToast(res.message || 'Failed to save settings', 'error');
+        }
       })
       .catch(e => {
         console.error(e);
@@ -2646,6 +2985,11 @@
       toggleModal('settingsModal', false);
       renderActiveTrade();
     }
+
+    // Periodic status polling fallback (ensures dashboard stays live even if SSE is blocked or disconnects)
+    setInterval(() => {
+      loadSettingsFromBackend();
+    }, 4000);
 
     function resetSettings() {
       document.getElementById('cfgTradeSize').value = '0.02';
@@ -2713,7 +3057,112 @@
       if (solscanLink && t.ca) solscanLink.href = `https://solscan.io/token/${t.ca}`;
     }
 
+    function updateMlDashboard(stats) {
+      if (!stats) return;
+      if (stats.model_status) {
+        const badge = document.getElementById('mlModelStatusBadge');
+        if (badge) badge.innerText = stats.model_status;
+      }
+      if (stats.pruned_count !== undefined) {
+        const txt = document.getElementById('mlPrunedCountText');
+        if (txt) txt.innerText = `${stats.pruned_count} pruned (${stats.pruned_pct || 0}%)`;
+      }
+      if (stats.avg_latency_ms !== undefined) {
+        const lat = document.getElementById('mlLatencyText');
+        if (lat) lat.innerText = `${stats.avg_latency_ms}ms`;
+      }
+      if (stats.recent_evaluations && stats.recent_evaluations.length > 0) {
+        const latest = stats.recent_evaluations[0];
+        updateMlGaugesFromVerdict(latest);
+      }
+    }
+
+    function updateMlGaugesFromVerdict(ml) {
+      if (!ml) return;
+      // Gauge 1: Rug Probability
+      const rugVal = document.getElementById('mlGaugeRugVal');
+      const rugBar = document.getElementById('mlGaugeRugBar');
+      const rugSub = document.getElementById('mlGaugeRugSub');
+      if (rugVal && ml.rug_pct !== undefined) {
+        rugVal.innerText = `${ml.rug_pct}%`;
+        const isDangerous = ml.rug_pct > 40;
+        rugVal.className = `text-2xl font-black tabular-nums ${isDangerous ? 'text-red-400' : 'text-emerald-400'}`;
+        if (rugBar) {
+          rugBar.style.width = `${Math.min(100, Math.max(5, ml.rug_pct))}%`;
+          rugBar.className = `h-full transition-all duration-300 ${isDangerous ? 'bg-red-500' : 'bg-emerald-500'}`;
+        }
+        if (rugSub) {
+          rugSub.innerText = `${ml.symbol || 'Target'} · ${ml.verdict || 'EVAL'}`;
+        }
+      }
+
+      // Gauge 2: Breakout Alpha Score
+      const alphaVal = document.getElementById('mlGaugeAlphaVal');
+      const alphaBar = document.getElementById('mlGaugeAlphaBar');
+      const alphaSub = document.getElementById('mlGaugeAlphaSub');
+      if (alphaVal && ml.alpha_score !== undefined) {
+        alphaVal.innerText = `${Math.round(ml.alpha_score)}/100`;
+        const isBullish = ml.alpha_score >= 60;
+        alphaVal.className = `text-2xl font-black tabular-nums ${isBullish ? 'text-cyan-300' : 'text-slate-400'}`;
+        if (alphaBar) {
+          alphaBar.style.width = `${Math.min(100, Math.max(5, ml.alpha_score))}%`;
+          alphaBar.className = `h-full transition-all duration-300 ${isBullish ? 'bg-cyan-500' : 'bg-slate-600'}`;
+        }
+        if (alphaSub) {
+          alphaSub.innerText = `${ml.latency_ms || 1.2}ms inference latency`;
+        }
+      }
+
+      // Gauge 3: Clone Risk
+      const cloneVal = document.getElementById('mlGaugeCloneVal');
+      const cloneBar = document.getElementById('mlGaugeCloneBar');
+      const cloneSub = document.getElementById('mlGaugeCloneSub');
+      if (cloneVal && ml.clone_risk !== undefined) {
+        cloneVal.innerText = `${Math.round(ml.clone_risk)}%`;
+        const isClone = ml.clone_risk >= 60;
+        cloneVal.className = `text-2xl font-black tabular-nums ${isClone ? 'text-amber-400' : 'text-purple-300'}`;
+        if (cloneBar) {
+          cloneBar.style.width = `${Math.min(100, Math.max(5, ml.clone_risk))}%`;
+          cloneBar.className = `h-full transition-all duration-300 ${isClone ? 'bg-amber-500' : 'bg-purple-500'}`;
+        }
+        if (cloneSub && ml.clone_reason) {
+          cloneSub.innerText = ml.clone_reason.slice(0, 32);
+        }
+      }
+    }
+
+    function triggerMlRetrain() {
+      const btn = document.getElementById('btnMlRetrain');
+      const icon = document.getElementById('mlRetrainIcon');
+      const txt = document.getElementById('mlRetrainBtnText');
+      if (icon) icon.classList.add('animate-spin');
+      if (txt) txt.innerText = 'Training...';
+      if (btn) btn.disabled = true;
+
+      fetch('/api/ml/retrain', { method: 'POST' })
+        .then(r => r.json())
+        .then(res => {
+          if (icon) icon.classList.remove('animate-spin');
+          if (btn) btn.disabled = false;
+          if (txt) txt.innerText = 'Retrain Models';
+          if (res.success) {
+            showToast(res.message, 'success');
+            const badge = document.getElementById('mlModelStatusBadge');
+            if (badge && res.model_status) badge.innerText = res.model_status;
+          } else {
+            showToast(res.message || 'Retrain skipped (accumulating trade outcomes)', 'info');
+          }
+        })
+        .catch(err => {
+          if (icon) icon.classList.remove('animate-spin');
+          if (btn) btn.disabled = false;
+          if (txt) txt.innerText = 'Retrain Models';
+          showToast('Failed to trigger retrain: ' + err, 'error');
+        });
+    }
+
     function mapOpportunity(opp) {
+
       const isPump = opp.source === 'Pump.fun' || opp.source === 'PumpFun' || opp.dex === 'pumpfun';
       const mcap = isPump ? (opp.market_cap_sol || 30) * solUsdPrice : (opp.liquidity_usd ? opp.liquidity_usd * 2.5 : 25000);
       const vol5m = isPump ? (opp.dev_sol || opp.dev_buy_sol || 1.5) * solUsdPrice : (opp.volume_5m || 0);
@@ -2737,8 +3186,10 @@
         twitter: twitter,
         telegram: telegram,
         agent_eval: opp.agent_eval || null,
+        ml_eval: opp.ml_eval || null,
         time: opp.discovered_at ? new Date(opp.discovered_at * 1000).toLocaleTimeString() : 'Live'
       };
+
     }
 
     function initSSE() {
@@ -2779,6 +3230,8 @@
           if (data.bot_mode) setBotModeUI(data.bot_mode);
           if (data.trade_mode) setTradeModeUI(data.trade_mode);
           if (data.settings) applySettingsToUI(data.settings);
+          if (data.ml_stats) updateMlDashboard(data.ml_stats);
+
 
           const sBadge = document.getElementById('engineStreamBadge');
           const sText = document.getElementById('engineStreamText');
@@ -2940,6 +3393,31 @@
             showToast('Settings synchronized', 'info');
           } catch(err) {}
         });
+
+        evtSource.addEventListener('ml_verdict', (e) => {
+          try {
+            const ml = JSON.parse(e.data);
+            updateMlGaugesFromVerdict(ml);
+            if (ml.approved === false) {
+              const prunedEl = document.getElementById('mlPrunedCountText');
+              if (prunedEl) {
+                const cur = parseInt(prunedEl.innerText) || 0;
+                prunedEl.innerText = `${cur + 1} pruned`;
+              }
+            }
+          } catch(err) {
+            console.warn('ml_verdict parse error:', err);
+          }
+        });
+
+        evtSource.addEventListener('ml_stats', (e) => {
+          try {
+            updateMlDashboard(JSON.parse(e.data));
+          } catch(err) {
+            console.warn('ml_stats parse error:', err);
+          }
+        });
+
 
         evtSource.addEventListener('trades_cleared', () => {
           executedTrades = [];

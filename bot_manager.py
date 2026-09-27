@@ -16,6 +16,8 @@ from trader import (
     get_wallet_sol_balance,
 )
 from agent_council import agent_council
+from ml_engine import ml_engine
+
 
 
 class BotManager:
@@ -46,6 +48,11 @@ class BotManager:
     def is_trading(self) -> bool:
         """Returns True if a trade position is currently active or opening."""
         return self.active_trade is not None or self.trade_lock.locked()
+
+    def reload_wallet(self):
+        """Reloads wallet keypair and address from configuration."""
+        self.keypair, self.wallet_address = config.load_wallet()
+        return self.wallet_address
 
     def subscribe(self) -> queue.Queue:
         """Subscribes an SSE client queue to receive live broadcast events."""
@@ -102,6 +109,8 @@ class BotManager:
 
     def start_workers(self):
         """Starts background worker threads for discovery and trade dispatching."""
+        if any(t.is_alive() for t in self.threads):
+            return
         self.stop_event.clear()
 
         t_dex = threading.Thread(target=self._dexscreener_worker, daemon=True)
@@ -114,6 +123,11 @@ class BotManager:
 
         self.log_dex("DexScreener background engine initialized.", "success")
         self.log_pump("Pump.fun WebSocket background sniper initialized.", "success")
+
+    def ensure_workers_started(self):
+        """Ensures worker threads are running, even under WSGI servers."""
+        if not any(t.is_alive() for t in self.threads):
+            self.start_workers()
 
     def _dexscreener_worker(self):
         scanner = TokenScanner(
@@ -138,13 +152,30 @@ class BotManager:
                             candidate["source"] = "DexScreener"
                             is_new = True
                     if is_new:
-                        # 1. Run AI Agent Council evaluation
+                        # 1. Run Quantitative ML Engine (Pandas, XGBoost, Vector Clone Detector)
+                        ml_res = ml_engine.evaluate(candidate)
+                        candidate["ml_eval"] = ml_res
+                        self.broadcast("ml_verdict", ml_res)
+
+                        # Fast Pruning Gate: Reject rugs, clone templates, or low alpha in < 2ms without LLM overhead
+                        if config.ML_FILTER_ENABLED and not ml_res.get("approved", True):
+                            self.opportunities.appendleft(candidate)
+                            self.broadcast("opportunity", candidate)
+                            self.log_dex(
+                                f"⚡ ML Fast-Pruned: {candidate['symbol']} (P(Rug): {ml_res['rug_pct']}% | Alpha: {ml_res['alpha_score']} | Clone: {ml_res['clone_risk']}%) -> {ml_res['reject_reason']}",
+                                "warning",
+                                ticker=candidate["symbol"],
+                            )
+                            continue
+
+                        # 2. Run AI Agent Council evaluation
                         eval_res = agent_council.evaluate_candidate(candidate)
                         candidate["agent_eval"] = eval_res
                         self.broadcast("agent_verdict", eval_res)
 
                         self.opportunities.appendleft(candidate)
                         self.broadcast("opportunity", candidate)
+
 
                         if not eval_res.get("configured", True):
                             self.trade_queue.put(candidate)
@@ -198,13 +229,30 @@ class BotManager:
                         is_new = True
 
                 if is_new:
-                    # 1. Run AI Agent Council evaluation
+                    # 1. Run Quantitative ML Engine (Pandas, XGBoost, Vector Clone Detector)
+                    ml_res = ml_engine.evaluate(candidate)
+                    candidate["ml_eval"] = ml_res
+                    self.broadcast("ml_verdict", ml_res)
+
+                    # Fast Pruning Gate: Reject rugs, clone templates, or low alpha in < 2ms without LLM overhead
+                    if config.ML_FILTER_ENABLED and not ml_res.get("approved", True):
+                        self.opportunities.appendleft(candidate)
+                        self.broadcast("opportunity", candidate)
+                        self.log_pump(
+                            f"⚡ ML Fast-Pruned: {candidate['symbol']} (P(Rug): {ml_res['rug_pct']}% | Alpha: {ml_res['alpha_score']} | Clone: {ml_res['clone_risk']}%) -> {ml_res['reject_reason']}",
+                            "warning",
+                            ticker=candidate["symbol"],
+                        )
+                        continue
+
+                    # 2. Run AI Agent Council evaluation
                     eval_res = agent_council.evaluate_candidate(candidate)
                     candidate["agent_eval"] = eval_res
                     self.broadcast("agent_verdict", eval_res)
 
                     self.opportunities.appendleft(candidate)
                     self.broadcast("opportunity", candidate)
+
 
                     if not eval_res.get("configured", True):
                         self.trade_queue.put(candidate)
@@ -552,6 +600,15 @@ class BotManager:
         self.active_trade = None
         self.broadcast("trade_completed", executed_trade)
         self.broadcast("active_trade", None)
+
+        # Record trade outcome to ML dataset for continuous training & backtesting
+        ml_engine.record_trade_outcome(
+            token_mint,
+            realized_pct,
+            int(time.time() - start_time),
+            exit_reason
+        )
+
 
         msg = f"Trade Closed: {symbol} [{trade_strategy}] -> Total Realized PnL: {realized_pct:+.2f}% ({pnl_sol:+.4f} SOL) [{exit_reason}]"
         lvl = "success" if pnl_sol >= 0 else "error"

@@ -1,7 +1,12 @@
 import os
 import json
+from pathlib import Path
 from dotenv import load_dotenv
 
+BASE_DIR = Path(__file__).resolve().parent
+# Explicitly load .env from the project directory
+load_dotenv(BASE_DIR / ".env")
+# Also fallback to default search in current working directory
 load_dotenv()
 
 # Network & RPC
@@ -78,6 +83,14 @@ PUMP_PRE_GRADUATION_TRACKING = os.getenv("PUMP_PRE_GRADUATION_TRACKING", "True")
 PUMP_GRADUATION_MIN_SOL = float(os.getenv("PUMP_GRADUATION_MIN_SOL", "65.0"))
 PUMP_GRADUATION_MAX_SOL = float(os.getenv("PUMP_GRADUATION_MAX_SOL", "84.0"))
 
+# Quantitative Machine Learning Engine (XGBoost, Pandas, Vector Clone Auditor)
+ML_FILTER_ENABLED = os.getenv("ML_FILTER_ENABLED", "True").lower() == "true"
+MAX_RUG_PROBABILITY = float(os.getenv("MAX_RUG_PROBABILITY", "0.45"))   # Max 45% rug probability allowed
+MIN_ML_ALPHA_SCORE = float(os.getenv("MIN_ML_ALPHA_SCORE", "60.0"))     # Min 60/100 Breakout Alpha
+MAX_CLONE_RISK = float(os.getenv("MAX_CLONE_RISK", "70.0"))             # Max 70% template clone similarity
+ML_AUTO_RETRAIN = os.getenv("ML_AUTO_RETRAIN", "True").lower() == "true"
+
+
 
 
 def load_wallet():
@@ -87,14 +100,17 @@ def load_wallet():
     Returns (keypair, wallet_address) or (None, None) if not configured.
     """
     private_key_str = os.getenv("SOLANA_PRIVATE_KEY")
-    if not private_key_str or private_key_str.strip() in ["your_private_key_here", ""]:
+    if not private_key_str:
+        return None, None
+
+    raw = private_key_str.strip().strip("'\"")
+    if raw in ["your_private_key_here", ""]:
         return None, None
 
     try:
         from solders.keypair import Keypair
         import base58
 
-        raw = private_key_str.strip()
         if raw.startswith("["):
             key_bytes = bytes(json.loads(raw))
         else:

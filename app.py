@@ -5,6 +5,8 @@ from flask import Flask, render_template, Response, request, jsonify
 import config
 from bot_manager import bot_manager
 from agent_council import agent_council
+from ml_engine import ml_engine
+
 
 app = Flask(__name__, template_folder="templates")
 
@@ -147,16 +149,33 @@ def get_runtime_settings():
         "pump_pre_graduation_tracking": config.PUMP_PRE_GRADUATION_TRACKING,
         "pump_graduation_min_sol": config.PUMP_GRADUATION_MIN_SOL,
         "pump_graduation_max_sol": config.PUMP_GRADUATION_MAX_SOL,
+        # Quantitative ML Alpha Engine (XGBoost + Embeddings)
+        "ml_filter_enabled": config.ML_FILTER_ENABLED,
+        "max_rug_probability": config.MAX_RUG_PROBABILITY,
+        "min_ml_alpha_score": config.MIN_ML_ALPHA_SCORE,
+        "max_clone_risk": config.MAX_CLONE_RISK,
+        "ml_auto_retrain": config.ML_AUTO_RETRAIN,
+        "ml_stats": ml_engine.get_stats(),
+        # Wallet & RPC Telemetry
+
+        "solana_rpc_url": config.RPC_URL,
+        "wallet_configured": bool(bot_manager.wallet_address),
+        "wallet_address": bot_manager.wallet_address or "Not Configured",
+        "wallet_short": f"{bot_manager.wallet_address[:4]}...{bot_manager.wallet_address[-4:]}" if bot_manager.wallet_address else "Not Configured",
     }
 
 
 @app.route("/api/status", methods=["GET"])
 def get_status():
+    if not bot_manager.wallet_address:
+        bot_manager.reload_wallet()
+    bot_manager.ensure_workers_started()
     balance = bot_manager.get_balance()
     rpc_info = get_rpc_telemetry()
     return jsonify({
+        "wallet_configured": bool(bot_manager.wallet_address),
         "wallet_address": bot_manager.wallet_address or "Not Configured",
-        "wallet_short": f"{bot_manager.wallet_address[:4]}...{bot_manager.wallet_address[-4:]}" if bot_manager.wallet_address else "None",
+        "wallet_short": f"{bot_manager.wallet_address[:4]}...{bot_manager.wallet_address[-4:]}" if bot_manager.wallet_address else "Not Configured",
         "sol_balance": balance,
         "sol_usd_price": get_sol_usd_price(),
         "bot_mode": bot_manager.bot_mode,
@@ -166,6 +185,7 @@ def get_status():
         "rpc_latency_ms": rpc_info["rpc_latency_ms"],
         "rpc_status": rpc_info["rpc_status"],
         "settings": get_runtime_settings(),
+        "ml_stats": ml_engine.get_stats(),
     })
 
 
@@ -189,12 +209,14 @@ def sse_stream():
                 "rpc_latency_ms": rpc_info["rpc_latency_ms"],
                 "rpc_status": rpc_info["rpc_status"],
                 "settings": get_runtime_settings(),
+                "ml_stats": ml_engine.get_stats(),
                 "dex_logs": list(bot_manager.dex_logs),
                 "pump_logs": list(bot_manager.pump_logs),
                 "opportunities": list(bot_manager.opportunities),
                 "trade_history": list(bot_manager.trade_history),
                 "agent_verdicts": agent_council.get_recent_verdicts(),
             }
+
             yield f"event: init\ndata: {json.dumps(initial_payload)}\n\n"
 
             # 2. Stream real-time events
@@ -288,10 +310,13 @@ def clear_logs():
     return jsonify({"success": True, "message": f"Logs cleared for {stream}"})
 
 
-def save_env_settings(updates: dict, env_path: str = ".env"):
+def save_env_settings(updates: dict, env_path: str = None):
     """
     Updates or appends key-value pairs in the .env file while preserving existing comments.
     """
+    if env_path is None:
+        env_path = str(config.BASE_DIR / ".env")
+
     if not os.path.exists(env_path):
         lines = []
     else:
@@ -384,6 +409,32 @@ def update_settings():
     if "pump_min_market_cap_sol" in data:
         config.PUMP_MIN_MARKET_CAP_SOL = float(data["pump_min_market_cap_sol"])
         env_updates["PUMP_MIN_MARKET_CAP_SOL"] = str(config.PUMP_MIN_MARKET_CAP_SOL)
+    # Solana Wallet & RPC Configuration
+    if "solana_private_key" in data:
+        new_pk = str(data["solana_private_key"]).strip().strip("'\"")
+        if new_pk and not new_pk.startswith("***") and new_pk != "your_private_key_here":
+            try:
+                from solders.keypair import Keypair
+                import base58
+                if new_pk.startswith("["):
+                    kb = bytes(json.loads(new_pk))
+                else:
+                    kb = base58.b58decode(new_pk)
+                # Verify valid keypair bytes
+                test_kp = Keypair.from_bytes(kb)
+                os.environ["SOLANA_PRIVATE_KEY"] = new_pk
+                env_updates["SOLANA_PRIVATE_KEY"] = new_pk
+                bot_manager.reload_wallet()
+            except Exception as e:
+                return jsonify({"success": False, "message": f"Invalid Solana Private Key format: {e}"}), 400
+
+    if "solana_rpc_url" in data:
+        new_rpc = str(data["solana_rpc_url"]).strip()
+        if new_rpc and new_rpc.startswith("http"):
+            config.RPC_URL = new_rpc
+            os.environ["SOLANA_RPC_URL"] = new_rpc
+            env_updates["SOLANA_RPC_URL"] = new_rpc
+
     # AI Agent Council Settings
     if "gemini_api_key" in data:
         new_key = str(data["gemini_api_key"]).strip()
@@ -445,6 +496,23 @@ def update_settings():
         config.PUMP_GRADUATION_MAX_SOL = float(data["pump_graduation_max_sol"])
         env_updates["PUMP_GRADUATION_MAX_SOL"] = str(config.PUMP_GRADUATION_MAX_SOL)
 
+    # Quantitative Machine Learning Engine (XGBoost + Embeddings)
+    if "ml_filter_enabled" in data:
+        config.ML_FILTER_ENABLED = bool(data["ml_filter_enabled"])
+        env_updates["ML_FILTER_ENABLED"] = str(config.ML_FILTER_ENABLED)
+    if "max_rug_probability" in data:
+        config.MAX_RUG_PROBABILITY = float(data["max_rug_probability"])
+        env_updates["MAX_RUG_PROBABILITY"] = str(config.MAX_RUG_PROBABILITY)
+    if "min_ml_alpha_score" in data:
+        config.MIN_ML_ALPHA_SCORE = float(data["min_ml_alpha_score"])
+        env_updates["MIN_ML_ALPHA_SCORE"] = str(config.MIN_ML_ALPHA_SCORE)
+    if "max_clone_risk" in data:
+        config.MAX_CLONE_RISK = float(data["max_clone_risk"])
+        env_updates["MAX_CLONE_RISK"] = str(config.MAX_CLONE_RISK)
+    if "ml_auto_retrain" in data:
+        config.ML_AUTO_RETRAIN = bool(data["ml_auto_retrain"])
+        env_updates["ML_AUTO_RETRAIN"] = str(config.ML_AUTO_RETRAIN)
+
     if env_updates:
         try:
             save_env_settings(env_updates)
@@ -453,6 +521,25 @@ def update_settings():
 
     bot_manager.broadcast("settings_updated", get_runtime_settings())
     return jsonify({"success": True, "message": "Settings updated & saved to .env", "settings": get_runtime_settings()})
+
+
+@app.route("/api/ml/stats", methods=["GET"])
+def get_ml_stats():
+    return jsonify({
+        "success": True,
+        "stats": ml_engine.get_stats(),
+        "enabled": config.ML_FILTER_ENABLED,
+        "max_rug_probability": config.MAX_RUG_PROBABILITY,
+        "min_ml_alpha_score": config.MIN_ML_ALPHA_SCORE,
+        "max_clone_risk": config.MAX_CLONE_RISK,
+    })
+
+
+@app.route("/api/ml/retrain", methods=["POST"])
+def retrain_ml_models():
+    res = ml_engine.train_models()
+    return jsonify(res)
+
 
 
 @app.route("/api/agent/recent", methods=["GET"])
